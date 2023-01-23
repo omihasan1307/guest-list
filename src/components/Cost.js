@@ -17,11 +17,12 @@ import { toast } from "react-toastify";
 import Popup from "reactjs-popup";
 import { auth, db } from "../firebase.init";
 import useBudget from "../Hooks/useBudget";
+import useCost from "../Hooks/useCost";
 import { handleSaveBudgetToDb } from "../utilities/dbManage";
 
 const Cost = () => {
   const user = auth.currentUser;
-  const [userCost, setUserCost] = useState([]);
+  const [userCost, setUserCost, cost] = useCost();
   const [budget, setBudget, totalBudget] = useBudget();
   const [costUpdate, setCostUpdate] = useState({});
 
@@ -59,30 +60,18 @@ const Cost = () => {
     e.target.reset();
   };
 
-  useEffect(() => {
-    onSnapshot(
-      query(collection(db, `cost/${user?.uid}/item`), orderBy("time", "asc")),
-      (snapshot) => {
-        setUserCost(snapshot.docs.map((e) => e.data()));
-      },
-      (error) => {}
-    );
-  }, [user?.uid]);
-
-  let cost = 0;
-  for (const e of userCost) {
-    cost = cost + parseInt(e.price);
-  }
   const Balance = totalBudget - cost;
 
   let warningMsg = 0;
-  const a = (((totalBudget / 100) * 0.1) / 100) * 0.1 * 100;
-  const b = (((cost / 100) * 0.1) / 100) * 0.1 * 100;
-  const c = a - b;
-  const d = (((c / 100) * 0.1) / 100) * 0.1;
+  const a = (cost / totalBudget) * 100;
+  console.log(a);
+  // const a = (((totalBudget / 100) * 0.1) / 100) * 0.1 * 100;
+  // const b = (((cost / 100) * 0.1) / 100) * 0.1 * 100;
+  // const c = a - b;
+  // const d = (((c / 100) * 0.1) / 100) * 0.1;
   // console.log((totalBudget / budget.length) * 100);
 
-  console.log(c);
+  // console.log(c);
   // if () {
 
   // }

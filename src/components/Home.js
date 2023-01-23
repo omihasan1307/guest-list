@@ -17,7 +17,7 @@ const Home = () => {
         </h1>
         <hr className="mb-3" />
         <NavLink
-          to="profile"
+          to="profile/info"
           className={({ isActive }) =>
             isActive
               ? "bg-purple-800 py-2 hover:bg-purple-800 hover:shadow-md"
