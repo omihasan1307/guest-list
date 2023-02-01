@@ -9,37 +9,35 @@ import EntryGuest from "./components/EntryGuest";
 import Cost from "./components/Cost";
 import Information from "./components/Information";
 import Picture from "./components/Picture";
+import RequiredAuth from "./components/RequiredAuth";
+import { Toaster } from "react-hot-toast";
+import NotFound from "./components/NotFound";
 
 function App() {
   return (
     <div>
       <Routes>
-        <Route path="/" element={<Home></Home>}>
+        <Route
+          path="/"
+          element={
+            <RequiredAuth>
+              <Home></Home>
+            </RequiredAuth>
+          }
+        >
           <Route path="/profile" element={<Profile />}>
             <Route path="info" element={<Information></Information>}></Route>
             <Route path="pictures" element={<Picture />}></Route>
           </Route>
           <Route path="/inviteGuest" element={<InviteGuest />}></Route>
           <Route path="/entryGuest" element={<EntryGuest />}></Route>
-          <Route path="/logIn" element={<Login />}></Route>
           <Route path="/cost" element={<Cost />}></Route>
         </Route>
+
+        <Route path="/login" element={<Login />}></Route>
+        <Route path="*" element={<NotFound />}></Route>
       </Routes>
-      <ToastContainer
-        position="top-center"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="colored"
-        toastStyle={{
-          backgroundColor: "#6b21a8",
-        }}
-      />
+      <Toaster />
     </div>
   );
 }

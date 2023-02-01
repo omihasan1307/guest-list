@@ -7,21 +7,20 @@ import {
   deleteDoc,
   doc,
   onSnapshot,
-  orderBy,
-  query,
   updateDoc,
 } from "firebase/firestore";
 import moment from "moment";
-import React, { useEffect, useState } from "react";
-import { toast } from "react-toastify";
+import React, { useState } from "react";
 import Popup from "reactjs-popup";
 import { auth, db } from "../firebase.init";
+import useAbsentGuest from "../Hooks/useAbsentGuest";
+import useEntryGuest from "../Hooks/useEntryGuest";
 
 const EntryGuest = () => {
   const user = auth.currentUser;
   const [searchResult, setSearchResult] = useState({});
-  const [search, setSearch] = useState([]);
-  const [userList, setUserList] = useState([]);
+  const [search, setSearch] = useAbsentGuest();
+  const [userList, setUserList] = useEntryGuest();
   const [update, setUpdate] = useState({});
 
   const handleEntrySubmit = (e) => {
@@ -46,31 +45,11 @@ const EntryGuest = () => {
     await updateDoc(doc(db, `entryGuest/${user?.uid}/lists`, docRef.id), {
       id: docRef.id,
     });
-    toast.success("added successful", {
-      position: "top-center",
-      autoClose: 3000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: "colored",
-    });
+
+    await deleteDoc(doc(db, `absentGuest/${user?.uid}/list`, searchResult.id));
+    setSearchResult({});
     e.target.reset();
   };
-
-  useEffect(() => {
-    onSnapshot(
-      query(
-        collection(db, `entryGuest/${user?.uid}/lists`),
-        orderBy("time", "asc")
-      ),
-      (snapshot) => {
-        setUserList(snapshot.docs.map((e) => e.data()));
-      },
-      (error) => {}
-    );
-  }, [user?.uid]);
 
   const handleRemoveGuest = async (id) => {
     await deleteDoc(doc(db, `entryGuest/${user?.uid}/lists`, id));
@@ -91,18 +70,7 @@ const EntryGuest = () => {
       (error) => {}
     );
   };
-  useEffect(() => {
-    onSnapshot(
-      query(
-        collection(db, `guestList/${user?.uid}/list`),
-        orderBy("time", "asc")
-      ),
-      (snapshot) => {
-        setSearch(snapshot.docs.map((e) => e.data()));
-      },
-      (error) => {}
-    );
-  }, [user?.uid]);
+
   const handleEditGuestName = (e) => {
     const { name, ...rest } = update;
     setUpdate({ name: e, ...rest });
@@ -134,7 +102,6 @@ const EntryGuest = () => {
 
   const handleOnSelect = (item) => {
     setSearchResult(item);
-    console.log(item);
   };
 
   const formatResult = (item) => {
@@ -146,17 +113,17 @@ const EntryGuest = () => {
     );
   };
   return (
-    <div className="grid grid-cols-5 ">
-      <div className="col-span-2 border-2 border-transparent border-r-slate-700">
-        <h2 className="text-2xl font-semibold text-center ">
-          Entry Guest Info
+    <div className="grid lg:grid-cols-5">
+      <div className="lg:col-span-2 border border-transparent lg:border-r-slate-700">
+        <h2 className="text-2xl font-semibold text-center uppercase">
+          Entry Guest
         </h2>
 
-        <form onSubmit={handleEntrySubmit}>
-          <label className="px-2 font-semibold text-slate-800" htmlFor="name">
-            Name :
+        <form onSubmit={handleEntrySubmit} className="w-3/4 mx-auto">
+          <label className="px-2 text-sm text-slate-800" htmlFor="name">
+            Name:
           </label>
-          <div className="w-3/4 my-1">
+          <div className="w-full my-1">
             <ReactSearchAutocomplete
               items={search}
               onSelect={handleOnSelect}
@@ -165,9 +132,8 @@ const EntryGuest = () => {
               autoFocus
               placeholder="Search guest"
               styling={{
-                border: "none",
+                border: "1px solid #06b6d4",
                 borderRadius: "4px",
-                backgroundColor: "#f3f4f6",
                 boxShadow: "none",
                 placeholderColor: "#a9a9a9",
                 iconColor: "#f3f4f6",
@@ -175,37 +141,34 @@ const EntryGuest = () => {
             />
           </div>
 
-          <label
-            className="px-2 font-semibold text-slate-800"
-            htmlFor="address"
-          >
-            Address :
+          <label className="px-2 text-sm text-slate-800" htmlFor="address">
+            Address:
           </label>
           <input
-            className="w-3/4 p-2 my-2  bg-gray-100 outline-none rounded block"
+            className="w-full p-2 my-2outline-none border border-cyan-500 rounded block"
             type="text"
             name="address"
             placeholder="Guest address"
-            // value={searchResult.address}
+            value={searchResult.address}
             required
           />
 
-          <label className="px-2 font-semibold text-slate-800" htmlFor="member">
-            Member :
+          <label className="px-2 text-sm text-slate-800" htmlFor="member">
+            Member:
           </label>
           <input
-            className="w-3/4 p-2 my-2  bg-gray-100 outline-none rounded block"
+            className="w-full p-2 my-2 outline-none border border-cyan-500 rounded block"
             type="number"
             name="member"
             placeholder="Guest member"
             required
           />
 
-          <label className="px-2 font-semibold text-slate-800" htmlFor="amount">
-            Amount :
+          <label className="px-2 text-sm text-slate-800" htmlFor="amount">
+            Amount:
           </label>
           <input
-            className="w-3/4 p-2 my-2  bg-gray-100 outline-none rounded block"
+            className="w-full p-2 my-2 outline-none border border-cyan-500 rounded block"
             type="number"
             name="amount"
             placeholder="Amount"
@@ -213,20 +176,21 @@ const EntryGuest = () => {
           />
 
           <input
-            className="w-3/4 bg-slate-800 text-white p-2 mt-7 outline-none rounded block hover:bg-purple-800"
+            className="w-full bg-cyan-500 text-white p-2 mt-7 outline-none rounded block hover:bg-cyan-600"
             type="submit"
-            value="submit"
+            value="Submit"
           />
         </form>
       </div>
 
-      <div className="col-span-3 px-8">
+      <div className="lg:col-span-3 lg:px-8">
         <div>
-          <h2 className="text-2xl font-semibold text-center mb-5">
-            Collected Amount : {guestAmount}
+          <h2 className="text-2xl font-semibold text-center my-8 lg:my-0 lg:mb-5  uppercase">
+            Collected Amount: {guestAmount}
+            <span className="text-sm lowercase">tk</span>
           </h2>
           <table className="tableSl text-center w-full">
-            <tr className="bg-slate-800 text-white ">
+            <tr className="bg-cyan-500 text-white ">
               <th>SL</th>
               <th>Name</th>
               <th>Address</th>
@@ -243,108 +207,100 @@ const EntryGuest = () => {
                 <td>{data.member}</td>
                 <td>{data.amount} TK</td>
                 <td>
-                  <Popup
-                    trigger={
-                      <button className="button">
-                        {" "}
-                        <FontAwesomeIcon
-                          onClick={() => handleUpdateGuest(data.id)}
-                          className=" hover:text-green-800 cursor-pointer"
-                          icon={faPenToSquare}
-                        />{" "}
-                      </button>
-                    }
-                    modal
-                  >
-                    {(close) => (
-                      <div className="modal p-5">
-                        <h4 className="header font-semibold text-slate-800 text-center text-2xl">
-                          {" "}
-                          Update Infomation
-                        </h4>
-                        <div className="content w-3/4 mx-auto">
-                          <label
-                            htmlFor="name"
-                            className="px-2 font-semibold text-slate-800"
-                          >
-                            Name :{" "}
-                          </label>
-                          <input
-                            className=" w-full bg-gray-100 p-2 my-2 border border-purple-800 outline-green-500 rounded block"
-                            type="text"
-                            name="name"
-                            value={update.name}
-                            onChange={(e) =>
-                              handleEditGuestName(e.target.value)
-                            }
-                            placeholder="Guest name"
-                            required
-                          />
+                  <label htmlFor="my-modal">
+                    <FontAwesomeIcon
+                      onClick={() => handleUpdateGuest(data.id)}
+                      className=" hover:text-green-800 cursor-pointer"
+                      icon={faPenToSquare}
+                    />
+                  </label>
 
-                          <label
-                            htmlFor="address"
-                            className="px-2 font-semibold text-slate-800"
-                          >
-                            Address :{" "}
-                          </label>
-                          <input
-                            className="w-full bg-gray-100 p-2 my-2 border border-purple-800 outline-green-500 rounded block"
-                            type="text"
-                            name="address"
-                            value={update.address}
-                            onChange={(e) =>
-                              handleEditGuestAddress(e.target.value)
-                            }
-                            placeholder="Guest address"
-                            required
-                          />
-                          <label
-                            htmlFor="member"
-                            className="px-2 font-semibold text-slate-800"
-                          >
-                            Member :{" "}
-                          </label>
-                          <input
-                            className="w-full bg-gray-100 p-2 my-2 border  border-purple-800 outline-green-500 rounded block"
-                            type="number"
-                            name="member"
-                            placeholder="Guest member"
-                            onChange={(e) =>
-                              handleEditGuestMember(e.target.value)
-                            }
-                            value={update.member}
-                            required
-                          />
-                          <label
-                            htmlFor="amount"
-                            className="px-2 font-semibold text-slate-800"
-                          >
-                            Amount :{" "}
-                          </label>
-                          <input
-                            className="w-full bg-gray-100 p-2 my-2 border  border-purple-800 outline-green-500 rounded block"
-                            type="number"
-                            name="amount"
-                            placeholder="Guest amount"
-                            onChange={(e) =>
-                              handleEditGuestAmount(e.target.value)
-                            }
-                            value={update.amount}
-                            required
-                          />
-                          <input
-                            className="w-full bg-slate-800 text-white p-2 mt-7 outline-none rounded block hover:bg-purple-800"
-                            type="submit"
-                            value="submit"
-                            onClick={() => {
-                              handleUpdateComplete(data.id);
-                              close();
-                            }}
-                          />
-                        </div>
+                  <input
+                    type="checkbox"
+                    id="my-modal"
+                    className="modal-toggle"
+                  />
+                  <div className="modal">
+                    <div className="modal-box text-left">
+                      <h4 className="header font-semibold text-slate-800 text-center text-2xl">
+                        Update Infomation
+                      </h4>
+
+                      <label
+                        htmlFor="name"
+                        className="px-2 text-sm text-slate-800"
+                      >
+                        Name:{" "}
+                      </label>
+                      <input
+                        className=" w-full bg-gray-100 p-2 my-2 border border-cyan-500 outline-green-500 rounded block"
+                        type="text"
+                        name="name"
+                        value={update.name}
+                        onChange={(e) => handleEditGuestName(e.target.value)}
+                        placeholder="Guest name"
+                        required
+                      />
+
+                      <label
+                        htmlFor="address"
+                        className="px-2 text-sm text-slate-800"
+                      >
+                        Address:{" "}
+                      </label>
+                      <input
+                        className="w-full bg-gray-100 p-2 my-2 border border-cyan-500 outline-green-500 rounded block"
+                        type="text"
+                        name="address"
+                        value={update.address}
+                        onChange={(e) => handleEditGuestAddress(e.target.value)}
+                        placeholder="Guest address"
+                        required
+                      />
+                      <label
+                        htmlFor="member"
+                        className="px-2 text-sm text-slate-800"
+                      >
+                        Member:{" "}
+                      </label>
+                      <input
+                        className="w-full bg-gray-100 p-2 my-2 border  border-cyan-500 outline-green-500 rounded block"
+                        type="number"
+                        name="member"
+                        placeholder="Guest member"
+                        onChange={(e) => handleEditGuestMember(e.target.value)}
+                        value={update.member}
+                        required
+                      />
+                      <label
+                        htmlFor="amount"
+                        className="px-2 text-sm text-slate-800"
+                      >
+                        Amount:{" "}
+                      </label>
+                      <input
+                        className="w-full bg-gray-100 p-2 my-2 border  border-cyan-500 outline-green-500 rounded block"
+                        type="number"
+                        name="amount"
+                        placeholder="Guest amount"
+                        onChange={(e) => handleEditGuestAmount(e.target.value)}
+                        value={update.amount}
+                        required
+                      />
+
+                      <div className="modal-action">
+                        <label
+                          onClick={() => {
+                            handleUpdateComplete(data.id);
+                          }}
+                          htmlFor="my-modal"
+                          className="btn w-full bg-cyan-500 text-white flex border-none outline-none rounded hover:bg-cyan-600"
+                        >
+                          Update
+                        </label>
                       </div>
-                    )}
-                  </Popup>
+                    </div>
+                  </div>
                 </td>
                 <td>
                   <FontAwesomeIcon
@@ -354,16 +310,20 @@ const EntryGuest = () => {
                   />{" "}
                 </td>
               </tr>
-            ))}{" "}
-            <tr className="bg-slate-800 text-white ">
-              <th></th>
-              <th>Sum</th>
-              <th>=</th>
-              <th>{guestMember}</th>
-              <th>{guestAmount} TK</th>
-              <th>{}</th>
-              <th>{}</th>
-            </tr>
+            ))}
+            {guestAmount > 0 && guestMember > 0 && (
+              <tr
+                className="bg-cyan-500 text-white"
+                style={{ backgroundColor: "#06b6d4" }}
+              >
+                <th></th>
+                <th colSpan={2}>Total</th>
+                <th>{guestMember}</th>
+                <th>{guestAmount} TK</th>
+                <th></th>
+                <th></th>
+              </tr>
+            )}
           </table>
         </div>
       </div>
