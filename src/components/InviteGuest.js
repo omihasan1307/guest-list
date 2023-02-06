@@ -11,7 +11,6 @@ import {
   where,
 } from "firebase/firestore";
 import { auth, db } from "../firebase.init";
-import { toast } from "react-toastify";
 import { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPenToSquare, faTrash } from "@fortawesome/free-solid-svg-icons";
@@ -51,18 +50,24 @@ const InviteGuest = () => {
           await updateDoc(doc(db, `guestList/${user?.uid}/list`, docRef.id), {
             id: docRef.id,
           });
-          // toast.success("added successful", {
-          //   position: "top-center",
-          //   autoClose: 3000,
-          //   hideProgressBar: false,
-          //   closeOnClick: true,
-          //   pauseOnHover: true,
-          //   draggable: true,
-          //   progress: undefined,
-          //   theme: "colored",
-          // });
+
+          const abDocRef = await addDoc(
+            collection(db, `absentGuest/${user?.uid}/list`),
+            {
+              name: name,
+              address: address,
+              member: member,
+              time: time,
+            }
+          );
+
+          await updateDoc(
+            doc(db, `absentGuest/${user?.uid}/list`, abDocRef.id),
+            {
+              id: abDocRef.id,
+            }
+          );
         } else {
-          // toast.error("already exist");
         }
         e.target.reset();
       }
@@ -85,6 +90,7 @@ const InviteGuest = () => {
   const handleRemoveGuest = async (id) => {
     await deleteDoc(doc(db, `guestList/${user?.uid}/list`, id));
   };
+
   const handleUpdateGuest = (id) => {
     onSnapshot(
       collection(db, `guestList/${user?.uid}/list`),
@@ -130,60 +136,59 @@ const InviteGuest = () => {
   }
 
   return (
-    <div className="grid grid-cols-5 ">
-      <div className=" col-span-2 border-2 border-transparent border-r-slate-700">
-        <h2 className="text-2xl font-semibold text-center ">Add Guest Info</h2>
+    <div className="grid lg:grid-cols-5 ">
+      <div className="lg:col-span-2 border border-transparent lg:border-r-slate-700">
+        <h2 className="text-2xl font-semibold text-center text-slate-700 uppercase">
+          Add Guest
+        </h2>
 
-        <form onSubmit={handleSubmit}>
-          <label htmlFor="name" className="px-2 font-semibold text-slate-800">
-            Name :{" "}
+        <form onSubmit={handleSubmit} className="w-3/4 mx-auto">
+          <label htmlFor="name" className="px-2 text-slate-800 text-sm">
+            Name:{" "}
           </label>
           <input
-            className="w-3/4 bg-gray-100 p-2 my-2 outline-none rounded block"
+            className="w-full p-2 my-2 outline-none border border-cyan-500 rounded block"
             type="text"
             name="name"
             placeholder="Guest name"
             required
           />
 
-          <label
-            htmlFor="address"
-            className="px-2 font-semibold text-slate-800"
-          >
-            Address :{" "}
+          <label htmlFor="address" className="px-2 text-sm text-slate-800">
+            Address:{" "}
           </label>
           <input
-            className="w-3/4 bg-gray-100 p-2 my-2 outline-none rounded block"
+            className="w-full  p-2 my-2 border border-cyan-500 outline-none rounded block"
             type="text"
             name="address"
             placeholder="Guest address"
             required
           />
 
-          <label htmlFor="member" className="px-2 font-semibold text-slate-800">
-            Member :{" "}
+          <label htmlFor="member" className="px-2 text-sm text-slate-800">
+            Member:{" "}
           </label>
           <input
-            className="w-3/4 bg-gray-100 p-2 my-2 outline-none rounded block"
+            className="w-full  p-2 my-2 border border-cyan-500 outline-none rounded block"
             type="number"
             name="member"
             placeholder="Guest member"
             required
           />
           <input
-            className="w-3/4 bg-slate-800 text-white p-2 mt-7 outline-none rounded block hover:bg-purple-800"
+            className="w-full cursor-pointer bg-cyan-500 text-white p-2 mt-7 outline-none rounded block hover:bg-cyan-600"
             type="submit"
-            value="submit"
+            value="Submit"
           />
         </form>
       </div>
-      <div className="col-span-3 px-8">
+      <div className="lg:col-span-3 lg:px-8">
         <div>
-          <h2 className="text-2xl font-semibold text-center mb-5">
-            Guest Invited : {totalGuest}
+          <h2 className="text-2xl font-semibold text-center my-8 lg:my-0 lg:mb-5 text-slate-700 uppercase">
+            Guest Invited: {totalGuest}
           </h2>
           <table className="tableSl text-center w-full">
-            <tr className="bg-slate-800 text-white ">
+            <tr className="bg-cyan-500 text-white ">
               <th>SL</th>
               <th>Name</th>
               <th>Address</th>
@@ -198,87 +203,86 @@ const InviteGuest = () => {
                 <td>{e.address}</td>
                 <td>{e.member}</td>
                 <td>
-                  <Popup
-                    trigger={
-                      <button className="button">
-                        {" "}
-                        <FontAwesomeIcon
-                          onClick={() => handleUpdateGuest(e.id)}
-                          className=" hover:text-green-800 cursor-pointer"
-                          icon={faPenToSquare}
-                        />{" "}
-                      </button>
-                    }
-                    modal
-                  >
-                    {(close) => (
-                      <div className="modal p-5">
-                        <h4 className="header font-semibold text-slate-800 text-center text-2xl">
-                          {" "}
-                          Update Infomation
-                        </h4>
-                        <div className="content w-3/4 mx-auto">
-                          <label
-                            htmlFor="name"
-                            className="px-2 font-semibold text-slate-800"
-                          >
-                            Name :{" "}
-                          </label>
-                          <input
-                            className=" w-full bg-gray-100 p-2 my-2 border border-purple-800 outline-green-500 rounded block"
-                            type="text"
-                            name="name"
-                            value={update.name}
-                            onChange={handleEditName}
-                            placeholder="Guest name"
-                            required
-                          />
+                  <label htmlFor="my-modal">
+                    <FontAwesomeIcon
+                      onClick={() => handleUpdateGuest(e.id)}
+                      className=" hover:text-green-800 cursor-pointer"
+                      icon={faPenToSquare}
+                    />
+                  </label>
 
-                          <label
-                            htmlFor="address"
-                            className="px-2 font-semibold text-slate-800"
-                          >
-                            Address :{" "}
-                          </label>
-                          <input
-                            className="w-full bg-gray-100 p-2 my-2 border border-purple-800 outline-green-500 rounded block"
-                            type="text"
-                            name="address"
-                            value={update.address}
-                            onChange={handleEditAddress}
-                            placeholder="Guest address"
-                            required
-                          />
+                  <input
+                    type="checkbox"
+                    id="my-modal"
+                    className="modal-toggle"
+                  />
+                  <div className="modal">
+                    <div className="modal-box text-left">
+                      <h4 className="header font-semibold text-slate-800 text-center text-2xl">
+                        Update Infomation
+                      </h4>
 
-                          <label
-                            htmlFor="member"
-                            className="px-2 font-semibold text-slate-800"
-                          >
-                            Member :{" "}
-                          </label>
-                          <input
-                            className="w-full bg-gray-100 p-2 my-2 border  border-purple-800 outline-green-500 rounded block"
-                            type="number"
-                            name="member"
-                            placeholder="Guest member"
-                            onChange={handleEditMember}
-                            value={update.member}
-                            required
-                          />
+                      <label
+                        htmlFor="name"
+                        className="px-2 font-sm text-slate-800"
+                      >
+                        Name:
+                      </label>
+                      <input
+                        className=" w-full bg-gray-100 p-2 my-2 border border-cyan-500 outline-green-500 rounded block"
+                        type="text"
+                        name="name"
+                        value={update.name}
+                        onChange={handleEditName}
+                        placeholder="Guest name"
+                        required
+                      />
 
-                          <input
-                            className="w-full bg-slate-800 text-white p-2 mt-7 outline-none rounded block hover:bg-purple-800"
-                            type="submit"
-                            value="submit"
-                            onClick={() => {
-                              handleUpdateComplete(e.id);
-                              close();
-                            }}
-                          />
-                        </div>
+                      <label
+                        htmlFor="address"
+                        className="px-2 font-sm text-slate-800"
+                      >
+                        Address:
+                      </label>
+                      <input
+                        className="w-full bg-gray-100 p-2 my-2 border border-cyan-500 outline-green-500 rounded block"
+                        type="text"
+                        name="address"
+                        value={update.address}
+                        onChange={handleEditAddress}
+                        placeholder="Guest address"
+                        required
+                      />
+
+                      <label
+                        htmlFor="member"
+                        className="px-2 font-sm text-slate-800"
+                      >
+                        Member:
+                      </label>
+                      <input
+                        className="w-full bg-gray-100 p-2 my-2 border  border-cyan-500 outline-green-500 rounded block"
+                        type="number"
+                        name="member"
+                        placeholder="Guest member"
+                        onChange={handleEditMember}
+                        value={update.member}
+                        required
+                      />
+
+                      <div className="modal-action">
+                        <label
+                          onClick={() => {
+                            handleUpdateComplete(e.id);
+                          }}
+                          htmlFor="my-modal"
+                          className="btn w-full bg-cyan-500 text-white flex border-none outline-none rounded hover:bg-cyan-600"
+                        >
+                          Update
+                        </label>
                       </div>
-                    )}
-                  </Popup>
+                    </div>
+                  </div>
                 </td>
                 <td>
                   <FontAwesomeIcon

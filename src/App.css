@@ -6,14 +6,27 @@ body {
   min-height: 100vh;
 }
 
+.nested-custom-bg {
+  min-height: 94vh;
+}
+
+.notFound {
+  min-height: 100vh;
+}
+
 table,
 th,
 td {
-  border: 1px solid gray;
+  /* border: 1px solid gray; */
+  /* padding: 0 5px; */
+}
+
+tr {
+  background-color: #a5f3fc;
 }
 
 tr:nth-child(even) {
-  background: rgba(168, 166, 166, 0.707);
+  background-color: #cffafe;
 }
 
 .tableSl {
@@ -26,41 +39,28 @@ tr:nth-child(even) {
 }
 
 .customBudget {
-  background: #d53369; /* fallback for old browsers */
-  background: -webkit-linear-gradient(
-    to right,
-    #cbad6d,
-    #d53369
-  ); /* Chrome 10-25, Safari 5.1-6 */
-  background: linear-gradient(
-    to right,
-    #cbad6d,
-    #d53369
-  ); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  background: linear-gradient(to right, #4a6ff4, #c27ff5);
 }
 .customSpent {
-  background: #fc466b; /* fallback for old browsers */
-  background: -webkit-linear-gradient(
-    to right,
-    #3f5efb,
-    #fc466b
-  ); /* Chrome 10-25, Safari 5.1-6 */
-  background: linear-gradient(
-    to right,
-    #3f5efb,
-    #fc466b
-  ); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  background: linear-gradient(to right, #39a3e5, #7173f2);
 }
 .customGuest {
-  background: #ee0979; /* fallback for old browsers */
-  background: -webkit-linear-gradient(
-    to right,
-    #ff6a00,
-    #ee0979
-  ); /* Chrome 10-25, Safari 5.1-6 */
-  background: linear-gradient(
-    to right,
-    #ff6a00,
-    #ee0979
-  ); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  background: linear-gradient(to right, #e65f78, #e79752);
+}
+
+.customLogin {
+  background: linear-gradient(to right, #06b6d4, #3b82f6);
+}
+
+.loading {
+  min-height: 100vh;
+}
+
+@media only screen and (max-width: 600px) {
+  .custom-bg {
+    min-height: 0vh;
+  }
+  .nested-custom-bg {
+    min-height: 0vh;
+  }
 }
